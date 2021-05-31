@@ -1,0 +1,101 @@
+<?php
+/**
+ * @author Drubu Team
+ * @copyright Copyright (c) 2021 Drubu
+ * @package Iflow_IflowShipping
+ */
+
+$_htmlId = $block->getHtmlId() ? $block->getHtmlId() : '_' . uniqid();
+$_colspan = $block->isAddAfter() ? 2 : 1;
+$addressFields = $block->getAddressFields();
+$addressFieldsOptions = $block->getAddressFieldsOptions();
+?>
+
+<div class="design_theme_ua_regexp" id="grid<?= $block->escapeHtmlAttr($_htmlId) ?>">
+    <div class="admin__control-table-wrapper">
+        <table class="admin__control-table" id="shipping_iflow_attributes_mapping_attributes">
+            <thead>
+            <tr>
+                <th></th>
+                <th>Atributo</th>
+                <th>Posicion de array</th>
+            </tr>
+            </thead>
+            <tbody id="addRow<?= $block->escapeHtmlAttr($_htmlId) ?>">
+            <?php foreach ($block->getAddressFields() as $field): ?>
+                <tr id="<?= $block->escapeHtmlAttr($_htmlId) ?>">
+                    <td class="field_<?= $field['value'] ?>">
+                        <span><?= $block->escapeHtml($field['label']) ?></span>
+                        <input type="hidden" id="<?= $block->escapeHtmlAttr($field['value']) ?>_field" name=<?php echo $block->escapeHtml("groups[iflow][groups][attributes_mapping][fields][attributes][value][{$field['value']}][field]") ?> class="required-entry" value="<?= $block->escapeHtml($field['value']) ?>" readonly>
+                    </td>
+                    <td class="attribute_<?= $block->escapeHtmlAttr($field['value']) ?>">
+                        <?php if($field['value'] == 'street'): ?>
+                            <select id="<?= $block->escapeHtmlAttr($field['value']) ?>_attribute" class="select admin__control-select attribute_options required-entry" name=<?php echo $block->escapeHtml("groups[iflow][groups][attributes_mapping][fields][attributes][value][{$field['value']}][attribute]") ?>>
+                                <?php echo $addressFieldsOptions; ?>
+                            </select>
+                        <?php else: ?>
+                            <select id="<?= $block->escapeHtmlAttr($field['value']) ?>_attribute" class="select admin__control-select attribute_options" name=<?php echo $block->escapeHtml("groups[iflow][groups][attributes_mapping][fields][attributes][value][{$field['value']}][attribute]") ?>>
+                                <?php echo $addressFieldsOptions; ?>
+                            </select>
+                        <?php endif; ?>
+                    </td>
+                    <td class="array_position_<?= $block->escapeHtmlAttr($field['value']) ?>">
+                        <div class="control-value" id="<?= $block->escapeHtmlAttr($field['value']) ?>_no_aplica">
+                            <span>No aplica</span>
+                        </div>
+                        <div class="control-value" id="<?= $block->escapeHtmlAttr($field['value']) ?>_si_aplica" style="display:none;">
+                            <input type="text" id="<?= $block->escapeHtmlAttr($field['value']) ?>_input_array_position" name=<?php echo $block->escapeHtml("groups[iflow][groups][attributes_mapping][fields][attributes][value][{$field['value']}][array_position]") ?>>
+                        </div>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <input type="hidden" name="groups[iflow][groups][attributes_mapping][fields][attributes][value][__empty]" value="">
+</div>
+<script>
+    require([
+        'jquery',
+    ], function ($) {
+        $(document).ready(function(){
+            $( ".attribute_options" ).change(function() {
+                var selected = $(this).find('option:selected');
+                var type = selected.data('type');
+                var field = $(this).attr("id").slice(0,-10);
+                if(type == 'select' || type == 'multiline'){
+                    $('#' + field + '_si_aplica').show();
+                    $('#' + field + '_no_aplica').hide();
+                    if(!$('#' + field + '_input_array_position').hasClass('required-entry')) {
+                        $('#' + field + '_input_array_position').addClass('required-entry')
+                    }
+                }
+                else{
+                    $('#' + field + '_si_aplica').hide();
+                    $('#' + field + '_no_aplica').show();
+                    if($('#' + field + '_input_array_position').hasClass('required-entry')) {
+                        $('#' + field + '_input_array_position').removeClass('required-entry')
+                    }
+                    $('#' + field + '_input_array_position').val('')
+                }
+            });
+            //Reviso si existe una configuracion guardada previamente
+        <?php
+            foreach ($block->getArrayRows() as $_rowId => $_row) {
+                    $field = $_row->getField();
+                    $attribute = $_row->getAttribute();
+                    $arrayPosition = $_row->getArrayPosition();
+                    if($attribute != '') {
+                        $fieldAttribute = $field . '_attribute';
+                        echo "$('#$fieldAttribute').val('$attribute').trigger('change');";
+                        if($arrayPosition != '') {
+                            $arrayPositionAttribute = $field . '_input_array_position';
+                            echo "$('#$arrayPositionAttribute').val('$arrayPosition');";
+                        }
+                    }
+                }
+            ?>
+
+        });
+    });
+</script>
