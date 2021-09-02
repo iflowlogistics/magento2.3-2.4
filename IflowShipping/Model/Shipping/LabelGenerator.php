@@ -34,7 +34,9 @@ class LabelGenerator extends \Magento\Shipping\Model\Shipping\LabelGenerator
         $labelsContent = [];
         $trackingNumbers = [];
         $info = $response->getInfo();
+        $iflow_shipment_id = '';
         foreach ($info as $inf) {
+            $iflow_shipment_id = isset($inf['shipment_id']) ? $inf['shipment_id'] : '';
             if (!empty($inf['tracking_number']) && !empty($inf['label_content'])) {
                 $labelsContent[] = $inf['label_content'];
                 if(!empty($inf['description'])) {
@@ -49,6 +51,7 @@ class LabelGenerator extends \Magento\Shipping\Model\Shipping\LabelGenerator
         }
         $outputPdf = $this->combineLabelsPdf($labelsContent);
         $shipment->setShippingLabel($outputPdf->render());
+        $shipment->setData('iflow_shipment_id',$iflow_shipment_id);
         $carrierCode = $carrier->getCarrierCode();
         $carrierTitle = $this->scopeConfig->getValue(
             'carriers/' . $carrierCode . '/title',

@@ -75,6 +75,11 @@ class Carrier extends AbstractCarrier implements CarrierInterface
     protected $iflowHelper;
 
     /**
+     * @var \Magento\Store\Model\StoreManagerInterfaceFactory
+     */
+    private $_storeManagerFactory;
+
+    /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory $rateErrorFactory
      * @param \Psr\Log\LoggerInterface $logger
@@ -104,6 +109,7 @@ class Carrier extends AbstractCarrier implements CarrierInterface
         \Magento\Catalog\Model\Product $productModel,
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
         \Iflow\IflowShipping\Helper\Data $iflowHelper,
+        \Magento\Store\Model\StoreManagerInterfaceFactory $storeManagerFactory,
         array $data = []
     ) {
         parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data);
@@ -113,6 +119,7 @@ class Carrier extends AbstractCarrier implements CarrierInterface
         $this->customerSession = $customerSession;
         $this->productModel = $productModel;
         $this->iflowHelper = $iflowHelper;
+        $this->_storeManagerFactory = $storeManagerFactory;
         $this->debugEnable = $this->iflowHelper->isDebugEnabled();
     }
 
@@ -301,6 +308,7 @@ class Carrier extends AbstractCarrier implements CarrierInterface
                     'tracking_number' => $result->getTrackingNumber(),
                     'label_content' => $result->getLabelContent(),
                     'description' => $result->getDescription(),
+                    'shipment_id' => $result->getShipmentId()
                 ];
             }
             $this->logInCustomFile('Description ' . $result->getDescription());
@@ -380,6 +388,7 @@ class Carrier extends AbstractCarrier implements CarrierInterface
                 $trackingNumber = $resultJson->results->tracking_id;
                 $shipping = $resultJson->results->shippings[0];
                 $labelUrl = $shipping->print_url;
+                $shipmentId = $shipping->shipment_id;
                 $labelContent = $this->_getLabelContentFromUrl($labelUrl);
             } catch (Exception $e) {
                 $this->logInCustomFile('API response parsing error: ' . $e->getMessage());
@@ -388,7 +397,8 @@ class Carrier extends AbstractCarrier implements CarrierInterface
             return new \Magento\Framework\DataObject([
                 'tracking_number' => $trackingNumber,
                 'label_content' => $labelContent,
-                'description' => $labelUrl
+                'description' => $labelUrl,
+                'shipment_id' => $shipmentId
                 ]);
         }
     }
@@ -445,6 +455,8 @@ class Carrier extends AbstractCarrier implements CarrierInterface
         $payload = new \stdClass;
         $payload->softlightUser = $this->iflowHelper->getUsername();
         $payload->softlightPassword = $this->iflowHelper->getPassword();
+        //endpoint
+        $payload->endpoint = $this->_storeManagerFactory->create()->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB) . "rest/default/V1/iflow/status";
         $payload->orderId = $request->getOrderShipment()->getOrder()->getIncrementId();
         $payload->packageId = $request->getPackageId(); // not req by SL
         $payload->name = $request->getRecipientContactPersonFirstName(); // not available separately
@@ -454,7 +466,9 @@ class Carrier extends AbstractCarrier implements CarrierInterface
         $payload->address = new \stdClass;
         $payload->address->street = $addressAttributes['calle'];
         $payload->address->number = $addressAttributes['numero']; // # not necessarily available
-        $payload->address->addressComplement = $addressAttributes['datos_adicionales']; // SL "between_1"
+        $payload->address->comments = $addressAttributes['datos_adicionales']; // SL "between_1"
+        $payload->address->floor = $addressAttributes['piso'];
+        $payload->address->apartment = $addressAttributes['departamento'];
         $payload->address->postalCode = $request->getRecipientAddressPostalCode();
         $payload->address->city = $request->getRecipientAddressCity();
         $payload->address->state = 'BUENOS AIRES';//$request->getRecipientAddressStateOrProvinceCode();

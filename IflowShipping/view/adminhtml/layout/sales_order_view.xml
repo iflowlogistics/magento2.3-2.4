@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<!--
+  ~ @author Drubu Team
+  ~ @copyright Copyright (c) 2021 Drubu
+  ~ @package Iflow_IflowShipping
+  -->
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="sales_order_tabs">
+            <action method="addTabAfter">
+                <argument name="name" xsi:type="string">iflow_tabs</argument>
+                <argument name="block" xsi:type="string">Iflow\IflowShipping\Block\Adminhtml\Order\Tab\View</argument>
+                <argument name="after" xsi:type="string">tabid</argument>
+            </action>
+        </referenceBlock>
+    </body>
+</page>
+

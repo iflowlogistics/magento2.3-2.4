@@ -87,6 +87,8 @@ class Data extends AbstractHelper
         $result = [
             'calle' => '',
             'numero' => '',
+            'piso' => '',
+            'departamento' => '',
             'datos_adicionales' => ''
         ];
         if(!empty($attributesJson)) {
@@ -107,6 +109,9 @@ class Data extends AbstractHelper
 
             $result['calle'] = trim($street);
             $result['numero'] = trim($number);
+            $result['piso'] = trim($floor);
+            $result['departamento'] = trim($apartment);
+
             if(count($datosAdicionalesArray) > 0) {
                 $result['datos_adicionales'] = trim(implode(', ', $datosAdicionalesArray), ', ');
             }
