@@ -19,6 +19,7 @@
             </argument>
         </arguments>
     </type>
+    <preference for="Iflow\IflowShipping\Api\NotificationsInterface" type="Iflow\IflowShipping\Model\Notifications" />
     <preference for="Magento\Shipping\Model\Shipping\LabelGenerator" type="Iflow\IflowShipping\Model\Shipping\LabelGenerator" />
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
@@ -30,4 +31,18 @@
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <plugin name="iflow_iflowshipping_sales_order_filters" type="Iflow\IflowShipping\Plugin\Adminhtml\Order\FilterGridCollection" sortOrder="100"/>
     </type>
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="iflow_status" xsi:type="string">sales_order.iflow_status</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ShipmentGridAggregator" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="iflow_status" xsi:type="string">sales_shipment.iflow_status</item>
+            </argument>
+        </arguments>
+    </virtualType>
 </config>

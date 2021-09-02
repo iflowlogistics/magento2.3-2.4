@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+  ~ @author Drubu Team
+  ~ @copyright Copyright (c) 2021 Drubu
+  ~ @package Iflow_IflowShipping
+  -->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../app/code/Magento/Webapi/etc/webapi.xsd">
+    <route url="/V1/iflow/status/" method="POST">
+        <service class="Iflow\IflowShipping\Api\NotificationsInterface" method="updateStatus"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+</routes>

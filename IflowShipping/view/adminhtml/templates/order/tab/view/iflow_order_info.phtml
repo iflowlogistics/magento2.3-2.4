@@ -1,0 +1,33 @@
+<?php  if (!$block->isHidden()) : ?>
+    <?php
+        $iflow_shipment_data = $block->getIflowShipmentData();
+    ?>
+    <div class="fieldset-wrapper order-information">
+        <div class="fieldset-wrapper-title">
+            <span class="title"><?php /* @escapeNotVerified */
+                echo __('Detalle de envio iflow - %1', $iflow_shipment_data['order_status']) ?></span>
+        </div>
+        <div>
+            <table class="admin__table-secondary">
+                <thead>
+                    <tr>
+                        <th>Magento Shipment</th>
+                        <th>Tracking</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                <?php foreach ($iflow_shipment_data['shipments'] as $iflow_shipment): ?>
+                    <tr>
+                        <td><?= $block->escapeHtml($iflow_shipment['magento_shipment']) ?></td>
+                        <td><?= $block->escapeHtml($iflow_shipment['tracks']) ?></td>
+                        <td><?= $block->escapeHtml($iflow_shipment['status']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<?php endif; ?>

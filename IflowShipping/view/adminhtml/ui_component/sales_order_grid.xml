@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ @author Drubu Team
+  ~ @copyright Copyright (c) 2021 Drubu
+  ~ @package Iflow_IflowShipping
+  -->
+
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <columns name="sales_order_columns">
+        <column name="iflow_status">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Iflow status</label>
+                <visible>true</visible>
+            </settings>
+        </column>
+    </columns>
+</listing>
