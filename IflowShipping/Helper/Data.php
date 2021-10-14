@@ -14,7 +14,7 @@ class Data extends AbstractHelper
 {
     const CARRIER_SECTION = 'carriers/iflow/';
     const SHIPPING_SECTION_CREDENTIALS = 'shipping/iflow/credentials/';
-    const SHIPPING_SECTION_MAPPING= 'shipping/iflow/attributes_mapping/';
+    const SHIPPING_SECTION_MAPPING = 'shipping/iflow/attributes_mapping/';
 
     /**
      * @var \Magento\Framework\Encryption\EncryptorInterface
@@ -22,7 +22,7 @@ class Data extends AbstractHelper
     protected $encryptor;
 
     public function __construct(
-        Context $context,
+        Context                                          $context,
         \Magento\Framework\Encryption\EncryptorInterface $encryptor
     )
     {
@@ -30,59 +30,72 @@ class Data extends AbstractHelper
         $this->encryptor = $encryptor;
     }
 
-    public function isDebugEnabled(){
+    public function isDebugEnabled()
+    {
         return $this->getConfigFlag(
             self::SHIPPING_SECTION_CREDENTIALS . 'debug_mode'
         );
     }
 
-    public function isActive(){
+    public function isActive()
+    {
         return $this->getConfigFlag(self::CARRIER_SECTION . 'active');
     }
 
-    public function getFixedPrice(){
+    public function getFixedPrice()
+    {
         return $this->getConfigData(self::CARRIER_SECTION . 'price');
     }
 
-    public function getTitle(){
+    public function getTitle()
+    {
         return $this->getConfigData(self::CARRIER_SECTION . 'title');
     }
 
-    public function getName(){
+    public function getName()
+    {
         return $this->getConfigData(self::CARRIER_SECTION . 'name');
     }
 
-    public function showMethodOnError(){
+    public function showMethodOnError()
+    {
         return $this->getConfigFlag(self::CARRIER_SECTION . 'showmethod');
     }
 
-    public function getErrorMessage(){
+    public function getErrorMessage()
+    {
         return $this->getConfigData(self::CARRIER_SECTION . 'specificerrmsg');
     }
 
-    public function getStoreId(){
+    public function getStoreId()
+    {
         return $this->encryptor->decrypt($this->getConfigData(self::SHIPPING_SECTION_CREDENTIALS . 'store_id'));
     }
 
-    public function getUrl(){
+    public function getUrl()
+    {
         return $this->isSandboxMode() ? $this->getConfigData(self::SHIPPING_SECTION_CREDENTIALS . 'sandbox_webservices_url') : $this->getConfigData(self::SHIPPING_SECTION_CREDENTIALS . 'production_webservices_url');
     }
 
-    public function isSandboxMode(){
+    public function isSandboxMode()
+    {
         return $this->getConfigFlag(
             self::SHIPPING_SECTION_CREDENTIALS . 'sandbox_mode'
         );
     }
 
-    public function getUsername(){
+    public function getUsername()
+    {
         return $this->getConfigData(self::SHIPPING_SECTION_CREDENTIALS . 'softlightusername');
     }
 
-    public function getPassword(){
-        return  $this->encryptor->decrypt($this->getConfigData(self::SHIPPING_SECTION_CREDENTIALS . 'softlightpassword'));
+    public function getPassword()
+    {
+        return $this->encryptor->decrypt($this->getConfigData(self::SHIPPING_SECTION_CREDENTIALS . 'softlightpassword'));
     }
 
-    public function getAttributesMapping($shippingAddress){
+    public function getAttributesMapping($shippingAddress)
+    {
         $attributesJson = $this->getConfigData(self::SHIPPING_SECTION_MAPPING . 'attributes');
         $result = [
             'calle' => '',
@@ -91,7 +104,7 @@ class Data extends AbstractHelper
             'departamento' => '',
             'datos_adicionales' => ''
         ];
-        if(!empty($attributesJson)) {
+        if (!empty($attributesJson)) {
             $attributesArray = json_decode($attributesJson, true);
             $street = $this->getAddressData($shippingAddress, $attributesArray['street']['attribute'], $attributesArray['street']['array_position']);
             $number = $this->getAddressData($shippingAddress, $attributesArray['number']['attribute'], $attributesArray['number']['array_position']);
@@ -100,10 +113,10 @@ class Data extends AbstractHelper
             $additional_notes = $this->getAddressData($shippingAddress, $attributesArray['additional_notes']['attribute'], $attributesArray['additional_notes']['array_position']);
 
             $datosAdicionalesArray = array();
-            if($floor != '' || $apartment != '') {
+            if ($floor != '' || $apartment != '') {
                 $datosAdicionalesArray[] = 'Piso/Departamento: ' . trim($floor . ' ' . $apartment);
             }
-            if($additional_notes != ''){
+            if ($additional_notes != '') {
                 $datosAdicionalesArray[] = 'Observaciones: ' . $additional_notes;
             }
 
@@ -112,24 +125,30 @@ class Data extends AbstractHelper
             $result['piso'] = trim($floor);
             $result['departamento'] = trim($apartment);
 
-            if(count($datosAdicionalesArray) > 0) {
+            if (count($datosAdicionalesArray) > 0) {
                 $result['datos_adicionales'] = trim(implode(', ', $datosAdicionalesArray), ', ');
             }
         }
 
-        if($result['calle'] == ''){
+        if ($result['calle'] == '') {
             $result['calle'] = $shippingAddress->getStreetLine(1);
         }
-        if($result['numero'] == ''){
-            $result['numero'] = $shippingAddress->getStreetLine(2);
+        if ($result['numero'] == '') {
+            $secondLine = $shippingAddress->getStreetLine(2);
+            if ($secondLine != '') {
+                $result['numero'] = $secondLine;
+            } else {
+                $result['numero'] = 0;
+            }
         }
 
         return $result;
     }
 
-    private function getAddressData($address, $attribute, $position){
+    private function getAddressData($address, $attribute, $position)
+    {
         $value = '';
-        if($attribute != ''){
+        if ($attribute != '') {
             $getStatement = 'get' . $this->getFunctionFormat($attribute);
             $result = $address->$getStatement();
 
@@ -137,8 +156,7 @@ class Data extends AbstractHelper
                 if (isset($position) && array_key_exists($position, $result)) {
                     $value = $result[$position];
                 }
-            }
-            else{
+            } else {
                 $value = $result;
             }
 //            $value = ($position != '') ? $addressObject->getData($attribute)[$position] : $addressObject->getData($attribute);
@@ -146,7 +164,8 @@ class Data extends AbstractHelper
         return $value;
     }
 
-    private function getFunctionFormat($name){
+    private function getFunctionFormat($name)
+    {
         $pos = strpos($name, '_');
         while (($pos = strpos($name, '_')) !== false) {
             $start = substr($name, 0, $pos);
@@ -156,15 +175,21 @@ class Data extends AbstractHelper
         return ucfirst($name);
     }
 
-    private function getConfigFlag($path){
+    private function getConfigFlag($path, $storeId = null)
+    {
         return $this->scopeConfig->isSetFlag(
-            $path
+            $path,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $storeId
         );
     }
 
-    private function getConfigData($path){
+    private function getConfigData($path, $storeId = null)
+    {
         return $this->scopeConfig->getValue(
-            $path
+            $path,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $storeId
         );
     }
 
